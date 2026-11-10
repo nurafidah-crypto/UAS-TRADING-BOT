@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment dan secrets
+.env
+.env.*
+!.env.example
+
+# Data dan hasil pengujian
+data/
+logs/
+
+# Editor dan sistem operasi
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

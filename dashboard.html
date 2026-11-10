@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indodax Trading Bot Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1120;color:#e5e7eb;font-family:Arial,sans-serif;padding:28px}
+header{margin-bottom:28px}
+h1{font-size:26px;margin:0 0 8px}
+h2{font-size:17px;margin:28px 0 14px}
+.subtitle{color:#94a3b8;font-size:13px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.card,.panel{background:#151f32;border:1px solid #263449;border-radius:12px;padding:18px}
+.card small{color:#94a3b8}
+.value{font-size:23px;font-weight:bold;margin-top:10px}
+.positive{color:#34d399}
+.negative{color:#fb7185}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:12px;border-bottom:1px solid #263449}
+th{color:#94a3b8}
+.note{color:#fbbf24;font-size:13px;line-height:1.7}
+.chart-wrap{position:relative;height:330px;width:100%}
+canvas{width:100%;height:100%}
+.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:12px;color:#cbd5e1;margin-bottom:15px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.status{font-size:13px;color:#94a3b8;margin-top:10px}
+footer{color:#64748b;font-size:12px;margin-top:28px}
+@media(max-width:600px){body{padding:16px}.value{font-size:19px}.chart-wrap{height:250px}}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Indodax Trading Bot</h1>
+<div class="subtitle">Multi-Pair Strategy | Out-of-Sample Performance Dashboard</div>
+<div class="subtitle">Initial Capital: Rp100.000.000 | Fee assumption: 0,1% per side</div>
+</header>
+
+<h2>Training Performance</h2>
+<div class="grid">
+<div class="card"><small>Final Equity</small><div class="value">Rp224,85 jt</div></div>
+<div class="card"><small>Total Return</small><div class="value positive">+124,85%</div></div>
+<div class="card"><small>CAGR</small><div class="value positive">+47,13%</div></div>
+<div class="card"><small>Maximum Drawdown</small><div class="value negative">-22,00%</div></div>
+<div class="card"><small>Win Rate</small><div class="value">26,25%</div></div>
+<div class="card"><small>Profit Factor</small><div class="value">1,264</div></div>
+<div class="card"><small>Completed Trades</small><div class="value">1.242</div></div>
+<div class="card"><small>Trading Fees</small><div class="value">Rp74,64 jt</div></div>
+</div>
+
+<h2>Out-of-Sample Test Performance</h2>
+<div class="grid">
+<div class="card"><small>Final Equity</small><div class="value">Rp69,94 jt</div></div>
+<div class="card"><small>Total Return</small><div class="value negative">-30,06%</div></div>
+<div class="card"><small>CAGR</small><div class="value negative">-32,81%</div></div>
+<div class="card"><small>Maximum Drawdown</small><div class="value negative">-40,32%</div></div>
+<div class="card"><small>Win Rate</small><div class="value">22,30%</div></div>
+<div class="card"><small>Profit Factor</small><div class="value">0,850</div></div>
+<div class="card"><small>Completed Trades</small><div class="value">574</div></div>
+<div class="card"><small>Trading Fees</small><div class="value">Rp33,03 jt</div></div>
+</div>
+
+<h2>Equity Curve — TRAIN vs TEST</h2>
+<div class="panel">
+<div class="legend">
+<span><i class="dot" style="background:#34d399"></i>TRAIN</span>
+<span><i class="dot" style="background:#60a5fa"></i>TEST</span>
+</div>
+<div class="chart-wrap">
+<canvas id="equityChart"></canvas>
+</div>
+<div class="status" id="chartStatus">Menunggu data CSV...</div>
+</div>
+
+<h2>TRAIN vs TEST Comparison</h2>
+<div class="panel">
+<table>
+<thead><tr><th>Metric</th><th>TRAIN</th><th>TEST</th></tr></thead>
+<tbody>
+<tr><td>Return</td><td class="positive">+124,85%</td><td class="negative">-30,06%</td></tr>
+<tr><td>CAGR</td><td>+47,13%</td><td>-32,81%</td></tr>
+<tr><td>Max Drawdown</td><td>-22,00%</td><td>-40,32%</td></tr>
+<tr><td>Win Rate</td><td>26,25%</td><td>22,30%</td></tr>
+<tr><td>Profit Factor</td><td>1,264</td><td>0,850</td></tr>
+<tr><td>Completed Trades</td><td>1.242</td><td>574</td></tr>
+<tr><td>BTC Buy & Hold</td><td>+151,93%</td><td>-8,32%</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Trading Cost Assumptions</h2>
+<div class="panel">
+<table>
+<tbody>
+<tr><td>Fee per side</td><td>0,10%</td></tr>
+<tr><td>Full spread assumption</td><td>0,04%</td></tr>
+<tr><td>Slippage per side</td><td>0,05%</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Performance Evaluation</h2>
+<div class="panel">
+<p class="note">The strategy achieved a positive return during the training period but generated a negative return during the out-of-sample test period. The test result underperformed BTC Buy & Hold. This indicates that the strategy has not demonstrated robust out-of-sample performance.</p>
+<p class="subtitle">Historical simulation results only. These results do not guarantee future returns or represent live trading performance.</p>
+</div>
+
+<footer>Indodax Trading Bot | Academic Project | Historical Backtest Results</footer>
+
+<script>
+const canvas = document.getElementById("equityChart");
+const ctx = canvas.getContext("2d");
+const statusText = document.getElementById("chartStatus");
+
+function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    const headers = lines[0].split(",");
+    const timeIndex = headers.indexOf("Time");
+    const equityIndex = headers.indexOf("Equity");
+
+    if (timeIndex < 0 || equityIndex < 0) {
+        throw new Error("Kolom Time atau Equity tidak ditemukan");
+    }
+
+    return lines.slice(1).map(line => {
+        const cols = line.split(",");
+        return {
+            time: cols[timeIndex],
+            equity: Number(cols[equityIndex])
+        };
+    }).filter(row => Number.isFinite(row.equity));
+}
+
+function drawChart(train, test) {
+    const rect = canvas.getBoundingClientRect();
+    const ratio = window.devicePixelRatio || 1;
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+    const width = rect.width;
+    const height = rect.height;
+    const pad = {left:85,right:20,top:20,bottom:45};
+
+    const allValues = [
+        ...train.map(d => d.equity),
+        ...test.map(d => d.equity)
+    ];
+
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
+    const range = max - min || 1;
+
+    const x = i => pad.left +
+        i / Math.max(allValues.length - 1, 1) *
+        (width - pad.left - pad.right);
+
+    const y = value => height - pad.bottom -
+        (value - min) / range *
+        (height - pad.top - pad.bottom);
+
+    ctx.clearRect(0,0,width,height);
+    ctx.font = "11px Arial";
+    ctx.fillStyle = "#94a3b8";
+    ctx.strokeStyle = "#263449";
+    ctx.lineWidth = 1;
+
+    for(let i=0;i<=4;i++){
+        const value = min + range*i/4;
+        const yy = y(value);
+        ctx.beginPath();
+        ctx.moveTo(pad.left,yy);
+        ctx.lineTo(width-pad.right,yy);
+        ctx.stroke();
+
+        ctx.fillText(
+            "Rp"+(value/1000000).toFixed(0)+" jt",
+            5,yy+4
+        );
+    }
+
+    function plot(data,color,offset,total){
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+
+        data.forEach((point,i)=>{
+            const xx = pad.left +
+                (offset+i)/Math.max(total-1,1) *
+                (width-pad.left-pad.right);
+            const yy = y(point.equity);
+
+            if(i===0) ctx.moveTo(xx,yy);
+            else ctx.lineTo(xx,yy);
+        });
+
+        ctx.stroke();
+    }
+
+    const total = train.length + test.length;
+    plot(train,"#34d399",0,total);
+    plot(test,"#60a5fa",train.length,total);
+
+    ctx.fillStyle="#94a3b8";
+    ctx.fillText("TRAIN",pad.left,height-12);
+    ctx.fillText("TEST",width-pad.right-35,height-12);
+}
+
+async function loadData(){
+    try{
+        const [trainResponse,testResponse] = await Promise.all([
+            fetch("./data/oos_results/train/equity_multi.csv"),
+            fetch("./data/oos_results/test/equity_multi.csv")
+        ]);
+
+        if(!trainResponse.ok || !testResponse.ok){
+            throw new Error("File CSV tidak ditemukan");
+        }
+
+        const train = parseCSV(await trainResponse.text());
+        const test = parseCSV(await testResponse.text());
+
+        if(!train.length || !test.length){
+            throw new Error("Data equity kosong");
+        }
+
+        drawChart(train,test);
+
+        statusText.textContent =
+            "Berhasil membaca "+train.length.toLocaleString("id-ID")+
+            " titik TRAIN dan "+test.length.toLocaleString("id-ID")+
+            " titik TEST dari file CSV.";
+    }catch(error){
+        statusText.textContent =
+            "Grafik belum dimuat: "+error.message+
+            ". Dashboard perlu dijalankan melalui server lokal.";
+    }
+}
+
+loadData();
+window.addEventListener("resize",loadData);
+</script>
+</body>
+</html>

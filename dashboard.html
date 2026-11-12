@@ -7,241 +7,453 @@
 <title>Indodax Trading Bot Dashboard</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#0b1120;color:#e5e7eb;font-family:Arial,sans-serif;padding:28px}
-header{margin-bottom:28px}
+body{margin:0;background:#0b1120;color:#e5e7eb;font-family:Arial,sans-serif;padding:25px}
+header{margin-bottom:25px}
 h1{font-size:26px;margin:0 0 8px}
-h2{font-size:17px;margin:28px 0 14px}
-.subtitle{color:#94a3b8;font-size:13px;line-height:1.6}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
-.card,.panel{background:#151f32;border:1px solid #263449;border-radius:12px;padding:18px}
+h2{font-size:18px;margin:28px 0 14px}
+h3{font-size:15px;margin:20px 0 12px;color:#cbd5e1}
+.subtitle,.muted{color:#94a3b8;font-size:13px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:13px}
+.card,.panel{background:#151f32;border:1px solid #263449;border-radius:12px;padding:17px}
 .card small{color:#94a3b8}
-.value{font-size:23px;font-weight:bold;margin-top:10px}
+.value{font-size:22px;font-weight:bold;margin-top:9px;overflow-wrap:anywhere}
 .positive{color:#34d399}
 .negative{color:#fb7185}
+.warning{color:#fbbf24}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:12px;border-bottom:1px solid #263449}
+th,td{text-align:left;padding:11px;border-bottom:1px solid #263449;white-space:nowrap}
 th{color:#94a3b8}
-.note{color:#fbbf24;font-size:13px;line-height:1.7}
-.chart-wrap{position:relative;height:330px;width:100%}
+.table-wrap{overflow-x:auto}
+.status{font-size:13px;color:#94a3b8;margin-top:12px}
+.pill{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;background:#263449}
+.note{font-size:13px;line-height:1.7;color:#fbbf24}
+.chart-wrap{height:330px;position:relative}
 canvas{width:100%;height:100%}
-.legend{display:flex;gap:20px;flex-wrap:wrap;font-size:12px;color:#cbd5e1;margin-bottom:15px}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;margin-bottom:12px;color:#cbd5e1}
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
-.status{font-size:13px;color:#94a3b8;margin-top:10px}
 footer{color:#64748b;font-size:12px;margin-top:28px}
-@media(max-width:600px){body{padding:16px}.value{font-size:19px}.chart-wrap{height:250px}}
+@media(max-width:600px){
+ body{padding:14px}
+ .value{font-size:19px}
+ .chart-wrap{height:260px}
+}
 </style>
 </head>
 <body>
 
 <header>
 <h1>Indodax Trading Bot</h1>
-<div class="subtitle">Multi-Pair Strategy | Out-of-Sample Performance Dashboard</div>
-<div class="subtitle">Initial Capital: Rp100.000.000 | Fee assumption: 0,1% per side</div>
+<div class="subtitle">Multi-Pair Strategy | Backtest & Forward Test Dashboard</div>
+<div class="subtitle">Initial Capital: Rp100.000.000 | Forward Mode: DRY_RUN</div>
+<div class="status" id="lastRefresh">Memuat dashboard...</div>
 </header>
 
-<h2>Training Performance</h2>
+<h2>Forward Test Overview</h2>
 <div class="grid">
-<div class="card"><small>Final Equity</small><div class="value">Rp224,85 jt</div></div>
-<div class="card"><small>Total Return</small><div class="value positive">+124,85%</div></div>
-<div class="card"><small>CAGR</small><div class="value positive">+47,13%</div></div>
-<div class="card"><small>Maximum Drawdown</small><div class="value negative">-22,00%</div></div>
-<div class="card"><small>Win Rate</small><div class="value">26,25%</div></div>
-<div class="card"><small>Profit Factor</small><div class="value">1,264</div></div>
-<div class="card"><small>Completed Trades</small><div class="value">1.242</div></div>
-<div class="card"><small>Trading Fees</small><div class="value">Rp74,64 jt</div></div>
+ <div class="card"><small>Mode</small><div class="value" id="mode">-</div></div>
+ <div class="card"><small>Initial Capital</small><div class="value" id="initialCapital">-</div></div>
+ <div class="card"><small>Cash</small><div class="value" id="cash">-</div></div>
+ <div class="card"><small>Open Positions</small><div class="value" id="positions">-</div></div>
+ <div class="card"><small>Completed Trades</small><div class="value" id="trades">-</div></div>
+ <div class="card"><small>Kill Switch</small><div class="value" id="killSwitch">-</div></div>
 </div>
 
-<h2>Out-of-Sample Test Performance</h2>
-<div class="grid">
-<div class="card"><small>Final Equity</small><div class="value">Rp69,94 jt</div></div>
-<div class="card"><small>Total Return</small><div class="value negative">-30,06%</div></div>
-<div class="card"><small>CAGR</small><div class="value negative">-32,81%</div></div>
-<div class="card"><small>Maximum Drawdown</small><div class="value negative">-40,32%</div></div>
-<div class="card"><small>Win Rate</small><div class="value">22,30%</div></div>
-<div class="card"><small>Profit Factor</small><div class="value">0,850</div></div>
-<div class="card"><small>Completed Trades</small><div class="value">574</div></div>
-<div class="card"><small>Trading Fees</small><div class="value">Rp33,03 jt</div></div>
+<div class="panel" style="margin-top:14px">
+ <div class="muted">Forward Test Start</div>
+ <div id="startTime" style="margin-top:7px">-</div>
+ <div class="muted" style="margin-top:12px">Status</div>
+ <div id="forwardStatus" style="margin-top:7px">Menunggu data...</div>
 </div>
 
-<h2>Equity Curve — TRAIN vs TEST</h2>
-<div class="panel">
-<div class="legend">
-<span><i class="dot" style="background:#34d399"></i>TRAIN</span>
-<span><i class="dot" style="background:#60a5fa"></i>TEST</span>
-</div>
-<div class="chart-wrap">
-<canvas id="equityChart"></canvas>
-</div>
-<div class="status" id="chartStatus">Menunggu data CSV...</div>
-</div>
-
-<h2>TRAIN vs TEST Comparison</h2>
-<div class="panel">
+<h2>Latest Market Signals</h2>
+<div class="panel table-wrap">
 <table>
-<thead><tr><th>Metric</th><th>TRAIN</th><th>TEST</th></tr></thead>
-<tbody>
-<tr><td>Return</td><td class="positive">+124,85%</td><td class="negative">-30,06%</td></tr>
-<tr><td>CAGR</td><td>+47,13%</td><td>-32,81%</td></tr>
-<tr><td>Max Drawdown</td><td>-22,00%</td><td>-40,32%</td></tr>
-<tr><td>Win Rate</td><td>26,25%</td><td>22,30%</td></tr>
-<tr><td>Profit Factor</td><td>1,264</td><td>0,850</td></tr>
-<tr><td>Completed Trades</td><td>1.242</td><td>574</td></tr>
-<tr><td>BTC Buy & Hold</td><td>+151,93%</td><td>-8,32%</td></tr>
+<thead>
+<tr>
+<th>Pair</th><th>Close</th><th>EMA 20</th><th>EMA 50</th>
+<th>RSI 14</th><th>Buy Signal</th><th>Valid</th>
+</tr>
+</thead>
+<tbody id="signalsTable">
+<tr><td colspan="7">Memuat indikator...</td></tr>
 </tbody>
 </table>
+<div class="status" id="signalStatus"></div>
 </div>
 
-<h2>Trading Cost Assumptions</h2>
-<div class="panel">
+<h2>Order Book Monitoring</h2>
+<div class="panel table-wrap">
 <table>
-<tbody>
-<tr><td>Fee per side</td><td>0,10%</td></tr>
-<tr><td>Full spread assumption</td><td>0,04%</td></tr>
-<tr><td>Slippage per side</td><td>0,05%</td></tr>
+<thead>
+<tr>
+<th>Pair</th><th>Best Bid</th><th>Best Ask</th>
+<th>Spread</th><th>Snapshot Time (UTC)</th>
+</tr>
+</thead>
+<tbody id="orderbookTable">
+<tr><td colspan="5">Memuat snapshot...</td></tr>
 </tbody>
 </table>
+<div class="status" id="orderbookStatus"></div>
+</div>
+
+<h2>OOS Performance — Fee 0.1% per Side</h2>
+
+<h3>Training Performance</h3>
+<div class="grid">
+ <div class="card"><small>Final Equity</small><div class="value">Rp224,85 jt</div></div>
+ <div class="card"><small>Total Return</small><div class="value positive">+124,85%</div></div>
+ <div class="card"><small>CAGR</small><div class="value positive">+47,13%</div></div>
+ <div class="card"><small>Maximum Drawdown</small><div class="value negative">-22,00%</div></div>
+ <div class="card"><small>Win Rate</small><div class="value">26,25%</div></div>
+ <div class="card"><small>Profit Factor</small><div class="value">1,264</div></div>
+ <div class="card"><small>Completed Trades</small><div class="value">1.242</div></div>
+ <div class="card"><small>Trading Fees</small><div class="value">Rp74,64 jt</div></div>
+</div>
+
+<h3>Out-of-Sample Test Performance</h3>
+<div class="grid">
+ <div class="card"><small>Final Equity</small><div class="value">Rp69,94 jt</div></div>
+ <div class="card"><small>Total Return</small><div class="value negative">-30,06%</div></div>
+ <div class="card"><small>CAGR</small><div class="value negative">-32,81%</div></div>
+ <div class="card"><small>Maximum Drawdown</small><div class="value negative">-40,32%</div></div>
+ <div class="card"><small>Win Rate</small><div class="value">22,30%</div></div>
+ <div class="card"><small>Profit Factor</small><div class="value">0,850</div></div>
+ <div class="card"><small>Completed Trades</small><div class="value">574</div></div>
+ <div class="card"><small>Trading Fees</small><div class="value">Rp33,03 jt</div></div>
+</div>
+
+<h2>OOS Performance — Fee 0.2% per Side</h2>
+
+<h3>Training Performance</h3>
+<div class="grid">
+ <div class="card"><small>Final Equity</small><div class="value">Rp150,09 jt</div></div>
+ <div class="card"><small>Total Return</small><div class="value positive">+50,09%</div></div>
+ <div class="card"><small>CAGR</small><div class="value positive">+21,35%</div></div>
+ <div class="card"><small>Maximum Drawdown</small><div class="value negative">-39,10%</div></div>
+ <div class="card"><small>Win Rate</small><div class="value">24,56%</div></div>
+ <div class="card"><small>Profit Factor</small><div class="value">1,094</div></div>
+ <div class="card"><small>Completed Trades</small><div class="value">1.242</div></div>
+ <div class="card"><small>Trading Fees</small><div class="value">Rp149,14 jt</div></div>
+</div>
+
+<h3>Out-of-Sample Test Performance</h3>
+<div class="grid">
+ <div class="card"><small>Final Equity</small><div class="value">Rp47,51 jt</div></div>
+ <div class="card"><small>Total Return</small><div class="value negative">-52,49%</div></div>
+ <div class="card"><small>CAGR</small><div class="value negative">-56,29%</div></div>
+ <div class="card"><small>Maximum Drawdown</small><div class="value negative">-57,49%</div></div>
+ <div class="card"><small>Win Rate</small><div class="value">21,43%</div></div>
+ <div class="card"><small>Profit Factor</small><div class="value">0,732</div></div>
+ <div class="card"><small>Completed Trades</small><div class="value">560</div></div>
+ <div class="card"><small>Trading Fees</small><div class="value">Rp58,15 jt</div></div>
+</div>
+
+<h2>Equity Curve Comparison — Fee 0.1% vs 0.2%</h2>
+<div class="panel">
+ <div class="legend">
+  <span><i class="dot" style="background:#34d399"></i>TRAIN — Fee 0.1%</span>
+  <span><i class="dot" style="background:#60a5fa"></i>TEST — Fee 0.1%</span>
+  <span><i class="dot" style="background:#fbbf24"></i>TRAIN — Fee 0.2%</span>
+  <span><i class="dot" style="background:#fb7185"></i>TEST — Fee 0.2%</span>
+ </div>
+ <div class="chart-wrap">
+  <canvas id="equityChart"></canvas>
+ </div>
+ <div class="status" id="chartStatus">Menunggu data CSV...</div>
 </div>
 
 <h2>Performance Evaluation</h2>
 <div class="panel">
-<p class="note">The strategy achieved a positive return during the training period but generated a negative return during the out-of-sample test period. The test result underperformed BTC Buy & Hold. This indicates that the strategy has not demonstrated robust out-of-sample performance.</p>
-<p class="subtitle">Historical simulation results only. These results do not guarantee future returns or represent live trading performance.</p>
+ <p class="note">
+ The strategy generated positive returns during training under both fee
+ scenarios. However, the out-of-sample test generated negative returns
+ under both scenarios. At a 0.2% fee per side, the test return was
+ -52.49% with a maximum drawdown of -57.49%.
+ The strategy has not demonstrated robust out-of-sample performance
+ and is not considered ready for live trading.
+ </p>
+ <p class="muted">
+ The 0.1% and 0.2% fee scenarios are separate historical simulations.
+ Both use an assumed full spread of 0.04% and slippage of 0.05% per side.
+ These are modeled costs, not actual historical execution costs.
+ The forward test uses a 0.2% taker fee and orderbook-based execution simulation.
+ </p>
+ <p class="muted">
+ Historical backtest results are separate from the ongoing forward test.
+ The forward test started on November 11, 2026 and has not completed
+ the originally planned 10-day evaluation period. It must not be
+ interpreted as a completed 10-day test.
+ </p>
 </div>
 
-<footer>Indodax Trading Bot | Academic Project | Historical Backtest Results</footer>
+<footer>
+Indodax Trading Bot | Academic Project | Backtest & Forward Test | DRY_RUN Only
+</footer>
 
 <script>
-const canvas = document.getElementById("equityChart");
-const ctx = canvas.getContext("2d");
-const statusText = document.getElementById("chartStatus");
+const pairs = ["btcidr","ethidr","xrpidr","solidr","pepeidr","hypeidr"];
+const $ = id => document.getElementById(id);
 
-function parseCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    const headers = lines[0].split(",");
-    const timeIndex = headers.indexOf("Time");
-    const equityIndex = headers.indexOf("Equity");
-
-    if (timeIndex < 0 || equityIndex < 0) {
-        throw new Error("Kolom Time atau Equity tidak ditemukan");
-    }
-
-    return lines.slice(1).map(line => {
-        const cols = line.split(",");
-        return {
-            time: cols[timeIndex],
-            equity: Number(cols[equityIndex])
-        };
-    }).filter(row => Number.isFinite(row.equity));
+function rupiah(value){
+ if(value === null || value === undefined || !Number.isFinite(Number(value))) return "-";
+ return "Rp" + Number(value).toLocaleString("id-ID",{maximumFractionDigits:2});
 }
 
-function drawChart(train, test) {
-    const rect = canvas.getBoundingClientRect();
-    const ratio = window.devicePixelRatio || 1;
-    canvas.width = rect.width * ratio;
-    canvas.height = rect.height * ratio;
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-    const width = rect.width;
-    const height = rect.height;
-    const pad = {left:85,right:20,top:20,bottom:45};
-
-    const allValues = [
-        ...train.map(d => d.equity),
-        ...test.map(d => d.equity)
-    ];
-
-    const min = Math.min(...allValues);
-    const max = Math.max(...allValues);
-    const range = max - min || 1;
-
-    const x = i => pad.left +
-        i / Math.max(allValues.length - 1, 1) *
-        (width - pad.left - pad.right);
-
-    const y = value => height - pad.bottom -
-        (value - min) / range *
-        (height - pad.top - pad.bottom);
-
-    ctx.clearRect(0,0,width,height);
-    ctx.font = "11px Arial";
-    ctx.fillStyle = "#94a3b8";
-    ctx.strokeStyle = "#263449";
-    ctx.lineWidth = 1;
-
-    for(let i=0;i<=4;i++){
-        const value = min + range*i/4;
-        const yy = y(value);
-        ctx.beginPath();
-        ctx.moveTo(pad.left,yy);
-        ctx.lineTo(width-pad.right,yy);
-        ctx.stroke();
-
-        ctx.fillText(
-            "Rp"+(value/1000000).toFixed(0)+" jt",
-            5,yy+4
-        );
-    }
-
-    function plot(data,color,offset,total){
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 1.5;
-
-        data.forEach((point,i)=>{
-            const xx = pad.left +
-                (offset+i)/Math.max(total-1,1) *
-                (width-pad.left-pad.right);
-            const yy = y(point.equity);
-
-            if(i===0) ctx.moveTo(xx,yy);
-            else ctx.lineTo(xx,yy);
-        });
-
-        ctx.stroke();
-    }
-
-    const total = train.length + test.length;
-    plot(train,"#34d399",0,total);
-    plot(test,"#60a5fa",train.length,total);
-
-    ctx.fillStyle="#94a3b8";
-    ctx.fillText("TRAIN",pad.left,height-12);
-    ctx.fillText("TEST",width-pad.right-35,height-12);
+function number(value,digits=4){
+ if(value === null || value === undefined || !Number.isFinite(Number(value))) return "-";
+ return Number(value).toLocaleString("id-ID",{maximumFractionDigits:digits});
 }
 
-async function loadData(){
-    try{
-        const [trainResponse,testResponse] = await Promise.all([
-            fetch("./data/oos_results/train/equity_multi.csv"),
-            fetch("./data/oos_results/test/equity_multi.csv")
-        ]);
-
-        if(!trainResponse.ok || !testResponse.ok){
-            throw new Error("File CSV tidak ditemukan");
-        }
-
-        const train = parseCSV(await trainResponse.text());
-        const test = parseCSV(await testResponse.text());
-
-        if(!train.length || !test.length){
-            throw new Error("Data equity kosong");
-        }
-
-        drawChart(train,test);
-
-        statusText.textContent =
-            "Berhasil membaca "+train.length.toLocaleString("id-ID")+
-            " titik TRAIN dan "+test.length.toLocaleString("id-ID")+
-            " titik TEST dari file CSV.";
-    }catch(error){
-        statusText.textContent =
-            "Grafik belum dimuat: "+error.message+
-            ". Dashboard perlu dijalankan melalui server lokal.";
-    }
+function escapeHTML(value){
+ return String(value ?? "").replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ })[c]);
 }
 
-loadData();
-window.addEventListener("resize",loadData);
+async function fetchText(path){
+ const response = await fetch(path + "?_=" + Date.now());
+ if(!response.ok) throw new Error("HTTP " + response.status + " - " + path);
+ return response.text();
+}
+
+function parseCSV(text){
+ const lines=text.trim().split(/\r?\n/);
+ if(lines.length<2) return [];
+ const headers=lines[0].split(",").map(x=>x.trim());
+ return lines.slice(1).filter(Boolean).map(line=>{
+  const cols=line.split(",");
+  const row={};
+  headers.forEach((h,i)=>row[h]=cols[i] ?? "");
+  return row;
+ });
+}
+
+async function loadState(){
+ try{
+  const response=await fetch("./data/forward_test/state.json?_="+Date.now());
+  if(!response.ok) throw new Error("HTTP "+response.status);
+  const s=await response.json();
+
+  $("mode").textContent=s.mode ?? "-";
+  $("initialCapital").textContent=rupiah(s.initial_capital);
+  $("cash").textContent=rupiah(s.cash);
+  $("positions").textContent=Object.keys(s.positions || {}).length;
+  $("trades").textContent=s.total_trades ?? 0;
+  $("killSwitch").textContent=s.kill_switch ? "ACTIVE" : "OFF";
+  $("killSwitch").className="value "+(s.kill_switch?"negative":"positive");
+  $("startTime").textContent=s.start_time ? new Date(s.start_time).toLocaleString("id-ID") : "-";
+  $("forwardStatus").textContent=s.mode==="DRY_RUN"
+   ? "Dry-run aktif. Tidak ada order sungguhan."
+   : "Periksa mode forward test.";
+ }catch(e){
+  $("forwardStatus").textContent="Gagal memuat state: "+e.message;
+ }
+}
+
+async function loadSignals(){
+ const rows=[];
+
+ for(const pair of pairs){
+  try{
+   const text=await fetchText("./data/forward_test/indicators/"+pair+"_indicators.csv");
+   const data=parseCSV(text);
+   if(!data.length) throw new Error("CSV kosong");
+
+   const d=data[data.length-1];
+
+   rows.push(`<tr>
+    <td>${pair.toUpperCase()}</td>
+    <td>${number(d.Close,8)}</td>
+    <td>${number(d.EMA_20,8)}</td>
+    <td>${number(d.EMA_50,8)}</td>
+    <td>${number(d.RSI_14,2)}</td>
+    <td class="${String(d.Buy_Signal).toLowerCase()==="true"?"positive":"muted"}">${escapeHTML(d.Buy_Signal)}</td>
+    <td>${escapeHTML(d.Valid_Trading)}</td>
+   </tr>`);
+  }catch(e){
+   rows.push(`<tr><td>${pair.toUpperCase()}</td><td colspan="6">Tidak tersedia: ${escapeHTML(e.message)}</td></tr>`);
+  }
+ }
+
+ $("signalsTable").innerHTML=rows.join("");
+ $("signalStatus").textContent="Menampilkan candle indikator terakhir dari masing-masing pair.";
+}
+
+async function loadOrderbook(){
+ try{
+  const text=await fetchText("./data/forward_test/orderbook/snapshots.csv");
+  const data=parseCSV(text);
+  const latest={};
+
+  data.forEach(r=>{
+   const pair=String(r.Pair||"").toLowerCase();
+   const price=Number(r.Price);
+   const amount=Number(r.Amount);
+
+   if(!pair || !Number.isFinite(price) || !Number.isFinite(amount)) return;
+
+   const time=Date.parse(r.Timestamp);
+
+   if(!latest[pair] || time>latest[pair].time){
+    latest[pair]={time,timestamp:r.Timestamp,bids:[],asks:[]};
+   }
+
+   if(time===latest[pair].time){
+    if(String(r.Side).toLowerCase()==="bid") latest[pair].bids.push(price);
+    if(String(r.Side).toLowerCase()==="ask") latest[pair].asks.push(price);
+   }
+  });
+
+  const html=pairs.map(pair=>{
+   const b=latest[pair];
+
+   if(!b || !b.bids.length || !b.asks.length){
+    return `<tr><td>${pair.toUpperCase()}</td><td colspan="4">Snapshot belum tersedia</td></tr>`;
+   }
+
+   const bid=Math.max(...b.bids);
+   const ask=Math.min(...b.asks);
+   const spread=(ask-bid)/((ask+bid)/2)*100;
+
+   return `<tr>
+    <td>${pair.toUpperCase()}</td>
+    <td>${number(bid,8)}</td>
+    <td>${number(ask,8)}</td>
+    <td>${number(spread,4)}%</td>
+    <td>${escapeHTML(b.timestamp)}</td>
+   </tr>`;
+  });
+
+  $("orderbookTable").innerHTML=html.join("");
+  $("orderbookStatus").textContent="Spread dihitung dari best bid dan best ask pada snapshot terakhir.";
+ }catch(e){
+  $("orderbookTable").innerHTML=`<tr><td colspan="5">Gagal memuat snapshot: ${escapeHTML(e.message)}</td></tr>`;
+  $("orderbookStatus").textContent="Pastikan file snapshot tersedia dan server lokal aktif.";
+ }
+}
+
+const canvas=$("equityChart");
+const ctx=canvas.getContext("2d");
+
+function parseEquity(text){
+ return parseCSV(text)
+  .map(r=>({time:r.Time,equity:Number(r.Equity)}))
+  .filter(r=>Number.isFinite(r.equity));
+}
+
+function drawChart(train01,test01,train02,test02){
+ const rect=canvas.getBoundingClientRect();
+ const ratio=window.devicePixelRatio||1;
+
+ if(!rect.width || !rect.height) return;
+
+ canvas.width=rect.width*ratio;
+ canvas.height=rect.height*ratio;
+ ctx.setTransform(ratio,0,0,ratio,0,0);
+
+ const w=rect.width;
+ const h=rect.height;
+ const p={l:85,r:18,t:18,b:35};
+
+ const totalLength=Math.max(
+  train01.length+test01.length,
+  train02.length+test02.length
+ );
+
+ const all=[
+  ...train01,...test01,...train02,...test02
+ ].map(d=>d.equity);
+
+ if(!all.length || !totalLength) return;
+
+ const min=Math.min(...all);
+ const max=Math.max(...all);
+ const range=max-min||1;
+
+ const x=i=>p.l+i/Math.max(totalLength-1,1)*(w-p.l-p.r);
+ const y=v=>h-p.b-(v-min)/range*(h-p.t-p.b);
+
+ ctx.clearRect(0,0,w,h);
+ ctx.font="11px Arial";
+
+ for(let i=0;i<=4;i++){
+  const v=min+range*i/4;
+  const yy=y(v);
+
+  ctx.strokeStyle="#263449";
+  ctx.beginPath();
+  ctx.moveTo(p.l,yy);
+  ctx.lineTo(w-p.r,yy);
+  ctx.stroke();
+
+  ctx.fillStyle="#94a3b8";
+  ctx.fillText("Rp"+(v/1e6).toFixed(0)+" jt",4,yy+4);
+ }
+
+ function plot(data,color,offset){
+  if(!data.length) return;
+
+  ctx.beginPath();
+  ctx.strokeStyle=color;
+  ctx.lineWidth=1.5;
+
+  data.forEach((d,i)=>{
+   if(i===0) ctx.moveTo(x(offset+i),y(d.equity));
+   else ctx.lineTo(x(offset+i),y(d.equity));
+  });
+
+  ctx.stroke();
+ }
+
+ plot(train01,"#34d399",0);
+ plot(test01,"#60a5fa",train01.length);
+ plot(train02,"#fbbf24",0);
+ plot(test02,"#fb7185",train02.length);
+}
+
+async function loadChart(){
+ try{
+  const [a,b,c,d]=await Promise.all([
+   fetchText("./data/oos_results/train/equity_multi.csv"),
+   fetchText("./data/oos_results/test/equity_multi.csv"),
+   fetchText("./data/oos_results_fee02/train/equity_multi.csv"),
+   fetchText("./data/oos_results_fee02/test/equity_multi.csv")
+  ]);
+
+  const train01=parseEquity(a);
+  const test01=parseEquity(b);
+  const train02=parseEquity(c);
+  const test02=parseEquity(d);
+
+  if(!train01.length || !test01.length || !train02.length || !test02.length){
+   throw new Error("Salah satu CSV equity kosong");
+  }
+
+  drawChart(train01,test01,train02,test02);
+
+  $("chartStatus").textContent=
+   "Berhasil membaca empat kurva: TRAIN dan TEST untuk fee 0,1% serta 0,2%.";
+ }catch(e){
+  $("chartStatus").textContent="Grafik belum dimuat: "+e.message;
+ }
+}
+
+async function refreshDashboard(){
+ await Promise.all([
+  loadState(),
+  loadSignals(),
+  loadOrderbook(),
+  loadChart()
+ ]);
+
+ $("lastRefresh").textContent=
+  "Pembaruan terakhir: "+new Date().toLocaleString("id-ID")+" | Auto refresh 60 detik";
+}
+
+refreshDashboard();
+setInterval(refreshDashboard,60000);
+window.addEventListener("resize",loadChart);
 </script>
 </body>
 </html>

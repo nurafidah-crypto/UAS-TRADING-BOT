@@ -18,3 +18,8 @@ logs/
 .idea/
 .DS_Store
 Thumbs.db
+# Backup dashboard lokal
+dashboard_backup.html
+dashboard_before_fee02.html
+src/forward_engine_backup.py
+src/forward_engine_backup.py
